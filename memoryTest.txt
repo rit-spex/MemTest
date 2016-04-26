@@ -1,0 +1,38 @@
+Radiation Memory Test Development Doc
+
+
+Front End
+-Square Grid
+--Each box is a page
+-Page
+--Address
+--Data
+---Wishlist:
+----Binary data displayed
+-Input
+--click box
+--Type in String
+--Upload new data to page
+-Corruption
+--Click to cause bitflip
+-Reset
+--Write new Data to every page
+-Graphics
+--Flash on change
+--Wishlist:
+---Animated Radiation strikes
+
+Back end
+-writeChip
+-corrupt chip
+-send state
+-receive commands
+--radiate byte
+--update page data
+-slowdown code
+--delay value
+Hardware
+w-rite byte/bit
+--simulate radiation strike
+-write page
+--actual information
