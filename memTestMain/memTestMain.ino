@@ -17,7 +17,7 @@ const int dataSize = 32000;
 
 
 void setup() {
-  Serial.begin(250000);
+  Serial.begin(230400);
 
 }
 
@@ -54,4 +54,5 @@ for(int i = 0; i<(dataSize / sizeof(packet)); i++) {
   }
   Serial.print("\n");
   delay(1000);
+  while(1);
 }
