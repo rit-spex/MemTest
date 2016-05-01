@@ -4,8 +4,8 @@ class DataBlock {
   String data;
   boolean isWritten;
   int address;
-  
-  DataBlock(int x, int y, int w, int h, String d, int addr) {
+  boolean previousButton;
+  DataBlock(int x, int y, int w, int h, int addr, String d ) {
     index = new PVector(x, y);
     dimensions = new PVector(w, h);
     data = d;
@@ -13,27 +13,52 @@ class DataBlock {
     isWritten = true;
   }
   
-  DataBlock(int x, int y, int w, int h) {
+  DataBlock(int x, int y, int w, int h, int addr) {
     index = new PVector(x, y);
     dimensions = new PVector(w, h);
-    data = "No Data Stored";
-    address = -1;
+    data = "";
+    address = addr;
     isWritten = false;
   }
   
   void display() {
-    if(isWritten)fill(255,0,0);
-    if(!isWritten)fill(0,255,0);
+    if(isWritten)fill(99,178,15);
+    if(!isWritten)fill(204,51,11);
     rect(index.x * dimensions.x, index.y * dimensions.y, dimensions.x, dimensions.y);
   }
   
+  void update() {
+    if(isWithin(mouseX, mouseY) && mousePressed && !previousButton) {
+     isWritten = !isWritten;
+     //println("Click recorded at " + address + " with data: " + data);
+   }
+   previousButton=mousePressed;
+  }
+  
   void changeData(String d) {
-    if(data == "No Data Stored") isWritten = true;
+    if(data == "") isWritten = true;
     data = d;
   }
   
   boolean isData() {
    if(isWritten) return true; 
    return false;
+  }
+  
+  void clearBlock() {
+    data = "";
+    //address = -1;
+    isWritten = false;
+  }
+  
+  boolean isWithin(int x, int y){
+    int minX = (int)index.x * (int)dimensions.x;
+    int minY = (int)index.y * (int)dimensions.y;
+    
+    int maxX = (int)minX + (int)dimensions.x;
+    int maxY = (int)minY + (int)dimensions.y;
+    
+    if(x>minX && x<maxX && y>minY && y<maxY) return true;
+    return false;
   }
 }
