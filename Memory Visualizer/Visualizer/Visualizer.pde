@@ -11,7 +11,8 @@ DataBlock [][] dataMatrix = new DataBlock[arrayDimension][arrayDimension];
 Map addrLookUp = new HashMap();
 
 Serial port;
-String input;
+//String input;
+String input = "write 210 This is the data";
 int bitRate = 9600;
 
 List<UIButton> buttons;
@@ -61,6 +62,7 @@ void draw() {
 void update() {  
   
   //readSerial();
+  processInput();
   if(changeData) {
   int targetAddr = (int)random(1, (arrayDimension*arrayDimension));
   PVector target = (PVector)addrLookUp.get(targetAddr);
@@ -107,4 +109,21 @@ void fillAll() {
        dataMatrix[i][j].isWritten=true;
      }
   }
+}
+
+void processInput() {
+ String in = input;
+ char[] data = new char[in.length()];
+ if(in.startsWith("write"))
+ {
+   int keyLength = 5;
+   in = in.substring(keyLength);
+   String address = in.substring(0,4);
+   in.getChars(address.length(),in.length(), data,0); 
+   address = address.trim();
+   int addr = Integer.parseInt(address);
+   println(addr);
+   
+   println(data);
+ }
 }
