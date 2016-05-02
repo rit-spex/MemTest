@@ -23,17 +23,61 @@ void setup(){
     initialize();
 
     // Prevents spooky unexpected things from happening after initialization
-    delay(10);
+    delay(5);
 }
-
-
+/**
+ * Serial input commands:
+ * Initialize: i
+ * Read
+ */
 
 
 void loop(){
-    corrupt(0);
-    printPackets(DATA_SIZE / sizeof(packet));
-    
-    while(1);
+  
+  if(Serial.available() > 0){
+    char command = Serial.read();
+
+
+    // Need to finish on these switch cases
+    switch(command){
+      case 'i':
+        initialize();
+        break;
+      case 'c':
+        corrupt(getSerialPacketNumber());
+        break;
+      default:
+        break;
+    }
+  }
+
+    delay(1000);
+}
+
+int getSerialPacketNumber(){
+  if(Serial.available() == 4){
+    int packetNumber = 0;
+
+    // 1000's place
+    char input = Serial.read();     
+    packetNumber += ((int) atol(&input)) * 1000;
+
+    // 100's place
+    input = Serial.read();
+    packetNumber += ((int) atol(&input)) * 100;
+
+    // 10's
+    input = Serial.read();
+    packetNumber += ((int) atol(&input)) * 10;
+
+    //1's
+    input = Serial.read();
+    packetNumber += (int) atol(&input);
+
+    return packetNumber;
+  }
+
+  return 0;
 }
 
 /**
