@@ -11,26 +11,26 @@ DataBlock [][] dataMatrix = new DataBlock[arrayDimension][arrayDimension];
 Map addrLookUp = new HashMap();
 
 Serial port;
-//String input;
-String input = "write 210 This is the data";
-int bitRate = 9600;
+String input="test";
+int bitRate = 230400;
 
 List<UIButton> buttons;
 
-boolean changeData = true;
+boolean changeData = false;
 
 void setup() {
   size(1000,1000);
   background(255,255,255);
-  //setupSerial();
+  setupSerial();
   
   int iterator = 0;
   for(int i= 0; i< arrayDimension; i++) {
      for(int j = 0; j < arrayDimension; j++) {
-       iterator++;
+       
        DataBlock data = new DataBlock(i, j, 30,30, iterator);
        dataMatrix[i][j] = data;
        addrLookUp.put(iterator, data.index);
+       iterator+=32;
      }
   }
   buttons = new LinkedList();
@@ -41,6 +41,10 @@ void setup() {
    buttons.add(clearSwitch);
    UIButton fillSwitch = new UIButton(450, 930, 250, 70, "Fill all blocks", "fill");
    buttons.add(fillSwitch);
+   
+   //
+   println("Initializing memory unit");
+   port.write('i');
 }
 
 void draw() {
@@ -61,10 +65,10 @@ void draw() {
 
 void update() {  
   
-  //readSerial();
+  readSerial();
   processInput();
   if(changeData) {
-  int targetAddr = (int)random(1, (arrayDimension*arrayDimension));
+  int targetAddr = 32*(int)random(0, (arrayDimension*arrayDimension));
   PVector target = (PVector)addrLookUp.get(targetAddr);
   dataMatrix[(int)target.x][(int)target.y].isWritten = true;
   
@@ -84,15 +88,21 @@ void update() {
 }
 
 void setupSerial() {
+  println(Serial.list()[0]);
   String portName = Serial.list()[0];
+  //String portName = "COM5";
   port = new Serial(this, portName, bitRate);
 }
 
 void readSerial() {
  if ( port.available() > 0) 
   {  
-  input = port.readStringUntil('\n'); 
+    println("read from serial port");
+    input = port.readStringUntil('\n'); 
+    println(input);
   }  
+  else input = "empty";
+  
 }
 
 void clearAll() {
@@ -112,18 +122,25 @@ void fillAll() {
 }
 
 void processInput() {
+  
  String in = input;
- char[] data = new char[in.length()];
- if(in.startsWith("write"))
+ char[] data = new char[50];
+ println(input);
+ if(in!=null && in.startsWith("write"))
  {
    int keyLength = 5;
    in = in.substring(keyLength);
-   String address = in.substring(0,4);
+   String address = in.substring(0,6);
    in.getChars(address.length(),in.length(), data,0); 
    address = address.trim();
+   address = address.replaceFirst("^0+(?!$)", "");
    int addr = Integer.parseInt(address);
-   println(addr);
+   //println(addr);
    
-   println(data);
+  // println(data);
+  PVector index = (PVector)addrLookUp.get(addr);
+  dataMatrix[(int)index.x][(int)index.y].data = String.valueOf(data);
+  dataMatrix[(int)index.x][(int)index.y].isWritten = true; //<>//
+ 
  }
 }

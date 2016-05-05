@@ -2,7 +2,8 @@
 #include <SpiRAM.h>
 
 #define SS 10           // Slave Select pin is 10
-#define DATA_SIZE 32000 // 23768 bytes is max capacity of the chip
+//#define DATA_SIZE 32000 // 23768 bytes is max capacity of the chip
+#define DATA_SIZE 30752 // 23768 bytes is max capacity of the chip
 
 #define BITSHIFTS 10    // Quantity of bitshifts to operate on the data
 #define STRING_LENGTH  29 // Length of the packet data member
@@ -14,7 +15,7 @@ struct packet{
 
 byte clock = 0;
 SpiRAM Sram(0, SS);
-
+int iterator = 1;
 void setup(){
     // Initialize rate to stable rate
     Serial.begin(230400);
@@ -33,10 +34,10 @@ void setup(){
 
 
 void loop(){
-  
+  //initialize();
   if(Serial.available() > 0){
     char command = Serial.read();
-
+    
 
     // Need to finish on these switch cases
     switch(command){
@@ -49,9 +50,18 @@ void loop(){
       default:
         break;
     }
-  }
 
-    delay(1000);
+    
+  }
+    /*iterator++;
+    if(iterator>961) iterator = 1;
+    String commandString = "write ";
+    if (iterator<100) commandString += '0';
+    if (iterator<10) commandString += '0';
+    commandString += iterator;
+    commandString += " This is the data";
+    Serial.println(commandString);
+    delay(50);*/
 }
 
 int getSerialPacketNumber(){
@@ -102,6 +112,8 @@ void corrupt(int packetNumber){
       data.isCorrupt = true;
 
       writePacket(data, packetNumber);
+
+      
     }
 }
 
@@ -190,7 +202,31 @@ void initialize(){
       memcpy(&buffer, &data, sizeof(packet));
 
       Sram.write_stream(data.address, buffer, sizeof(packet));
+      sendCommand("write ", data.address, data.data);
+    /*
+    String commandString = "write ";
+    if (data.address<10000) commandString += '0';
+    if (data.address<1000) commandString += '0';
+    if (data.address<100) commandString += '0';
+    if (data.address<10) commandString += '0';
+    commandString += data.address;
+    commandString += data.data;
+    Serial.println(commandString);
+    delay(50);*/
     }
 }
+
+void sendCommand(String command, int addr, String data) {
+  String commandString = command;
+    if (addr<10000) commandString += '0';
+    if (addr<1000) commandString += '0';
+    if (addr<100) commandString += '0';
+    if (addr<10) commandString += '0';
+    commandString += addr;
+    commandString += data;
+    Serial.println(commandString);
+    delay(50);
+}
+
 
 
