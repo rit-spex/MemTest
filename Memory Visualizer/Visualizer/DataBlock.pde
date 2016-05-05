@@ -3,6 +3,7 @@ class DataBlock {
   PVector dimensions;
   String data;
   boolean isWritten;
+  boolean isCorrupt;
   int address;
   boolean previousButton;
   DataBlock(int x, int y, int w, int h, int addr, String d ) {
@@ -11,6 +12,7 @@ class DataBlock {
     data = d;
     address = addr;
     isWritten = true;
+    isCorrupt = false;
   }
   
   DataBlock(int x, int y, int w, int h, int addr) {
@@ -19,11 +21,14 @@ class DataBlock {
     data = "";
     address = addr;
     isWritten = false;
+    isCorrupt = false;
+
   }
   
   void display() {
     if(isWritten)fill(99,178,15);
     if(!isWritten)fill(204,51,11);
+    if(isCorrupt)fill(102,25,6);
     rect(index.x * dimensions.x, index.y * dimensions.y, dimensions.x, dimensions.y);
   }
   

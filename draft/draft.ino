@@ -21,7 +21,7 @@ void setup(){
     Serial.begin(230400);
 
     // Set the board up and have it populated with defaults
-    initialize();
+    //initialize();
 
     // Prevents spooky unexpected things from happening after initialization
     delay(5);
@@ -47,6 +47,9 @@ void loop(){
       case 'c':
         corrupt(getSerialPacketNumber());
         break;
+      case 'w':
+        wipe();
+        break;
       default:
         break;
     }
@@ -65,7 +68,7 @@ void loop(){
 }
 
 int getSerialPacketNumber(){
-  if(Serial.available() == 4){
+  /*if(Serial.available() == 4){
     int packetNumber = 0;
 
     // 1000's place
@@ -87,7 +90,12 @@ int getSerialPacketNumber(){
     return packetNumber;
   }
 
-  return 0;
+  
+
+  return 0;*/
+
+  int addr = sizeof(packet) * (int)random(0,(DATA_SIZE / sizeof(packet)));
+  return addr;
 }
 
 /**
@@ -112,9 +120,11 @@ void corrupt(int packetNumber){
       data.isCorrupt = true;
 
       writePacket(data, packetNumber);
-
+      sendCommand("crrpt ", packetNumber, data.data);
       
     }
+    
+
 }
 
 /**
@@ -178,7 +188,7 @@ void printPackets(int numPackets){
  * Checks if the packet index is in bounds
  */
 boolean isValid(int packetNumber){
-  if((sizeof(packet) * packetNumber) < DATA_SIZE){
+  if((sizeof(packet) + packetNumber) < DATA_SIZE){
     return true;
   } else {
     return false;
@@ -203,19 +213,22 @@ void initialize(){
 
       Sram.write_stream(data.address, buffer, sizeof(packet));
       sendCommand("write ", data.address, data.data);
-    /*
-    String commandString = "write ";
-    if (data.address<10000) commandString += '0';
-    if (data.address<1000) commandString += '0';
-    if (data.address<100) commandString += '0';
-    if (data.address<10) commandString += '0';
-    commandString += data.address;
-    commandString += data.data;
-    Serial.println(commandString);
-    delay(50);*/
     }
 }
 
+void wipe() {
+  for(uint16_t i = 0; i < (DATA_SIZE / sizeof(packet)); i++){
+    char buffer[sizeof(packet)] = "";
+    Sram.write_stream(i * sizeof(packet), buffer, sizeof(packet));
+    sendCommand("wiped ",i * sizeof(packet), buffer);
+  }
+}
+
+
+//Sends a command to the visualizer
+//first 6 bytes are the command string
+//2 byte integer address
+//String of packet data
 void sendCommand(String command, int addr, String data) {
   String commandString = command;
     if (addr<10000) commandString += '0';
@@ -223,9 +236,10 @@ void sendCommand(String command, int addr, String data) {
     if (addr<100) commandString += '0';
     if (addr<10) commandString += '0';
     commandString += addr;
+    commandString += ' ';
     commandString += data;
     Serial.println(commandString);
-    delay(50);
+    delay(10);
 }
 
 

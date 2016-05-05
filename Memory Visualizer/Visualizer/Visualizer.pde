@@ -42,9 +42,10 @@ void setup() {
    UIButton fillSwitch = new UIButton(450, 930, 250, 70, "Fill all blocks", "fill");
    buttons.add(fillSwitch);
    
+   
    //
-   println("Initializing memory unit");
-   port.write('i');
+   /*println("Initializing memory unit");
+   port.write('i');*/
 }
 
 void draw() {
@@ -67,22 +68,23 @@ void update() {
   
   readSerial();
   processInput();
-  if(changeData) {
+  if(changeData) {/*
   int targetAddr = 32*(int)random(0, (arrayDimension*arrayDimension));
   PVector target = (PVector)addrLookUp.get(targetAddr);
   dataMatrix[(int)target.x][(int)target.y].isWritten = true;
   
   targetAddr = (int)random(1, (arrayDimension*arrayDimension));
   target = (PVector)addrLookUp.get(targetAddr);
-  dataMatrix[(int)target.x][(int)target.y].clearBlock();
+  dataMatrix[(int)target.x][(int)target.y].clearBlock();*/
+  port.write('c');
   }
   
   for( UIButton b : buttons) {
      b.update(); 
      if(b.isPressed){
        if(b.command=="Start/Stop") changeData = !changeData;
-       if(b.command=="clear") clearAll();
-       if(b.command=="fill") fillAll();
+       if(b.command=="clear") port.write('w');//clearAll();
+       if(b.command=="fill") port.write('i');//fillAll();
      }
   }
 }
@@ -125,22 +127,55 @@ void processInput() {
   
  String in = input;
  char[] data = new char[50];
- println(input);
- if(in!=null && in.startsWith("write"))
- {
-   int keyLength = 5;
-   in = in.substring(keyLength);
-   String address = in.substring(0,6);
-   in.getChars(address.length(),in.length(), data,0); 
-   address = address.trim();
-   address = address.replaceFirst("^0+(?!$)", "");
-   int addr = Integer.parseInt(address);
-   //println(addr);
+ if(in!=null) {
+   if(in.startsWith("write"))
+   {
+     int keyLength = 5;
+     in = in.substring(keyLength);
+     String address = in.substring(0,6);
+     in.getChars(address.length(),in.length(), data,0); 
+     address = address.trim();
+     address = address.replaceFirst("^0+(?!$)", "");
+     int addr = Integer.parseInt(address);
+  
+    PVector index = (PVector)addrLookUp.get(addr);
+    dataMatrix[(int)index.x][(int)index.y].data = String.valueOf(data);
+    dataMatrix[(int)index.x][(int)index.y].isWritten = true; //<>//
+    dataMatrix[(int)index.x][(int)index.y].isCorrupt = false;
+   }
    
-  // println(data);
-  PVector index = (PVector)addrLookUp.get(addr);
-  dataMatrix[(int)index.x][(int)index.y].data = String.valueOf(data);
-  dataMatrix[(int)index.x][(int)index.y].isWritten = true; //<>//
- 
+   if(in.startsWith("crrpt"))
+   {
+     int keyLength = 5;
+     in = in.substring(keyLength);
+     String address = in.substring(0,6);
+     in.getChars(address.length(),in.length(), data,0); 
+     address = address.trim();
+     address = address.replaceFirst("^0+(?!$)", "");
+     int addr = Integer.parseInt(address);
+  
+    PVector index = (PVector)addrLookUp.get(addr);
+    dataMatrix[(int)index.x][(int)index.y].data = String.valueOf(data);
+    dataMatrix[(int)index.x][(int)index.y].isWritten = true;
+    dataMatrix[(int)index.x][(int)index.y].isCorrupt = true;
+   }
+   
+   if(in.startsWith("wiped"))
+   {
+     int keyLength = 5;
+     in = in.substring(keyLength);
+     String address = in.substring(0,6);
+     in.getChars(address.length(),in.length(), data,0); 
+     address = address.trim();
+     address = address.replaceFirst("^0+(?!$)", "");
+     int addr = Integer.parseInt(address);
+  
+    PVector index = (PVector)addrLookUp.get(addr);
+    dataMatrix[(int)index.x][(int)index.y].data = String.valueOf(data);
+    dataMatrix[(int)index.x][(int)index.y].isWritten = false;
+    dataMatrix[(int)index.x][(int)index.y].isCorrupt = false;
+   }
  }
+ 
+ 
 }
