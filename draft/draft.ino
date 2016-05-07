@@ -16,6 +16,7 @@ struct packet{
 byte clock = 0;
 SpiRAM Sram(0, SS);
 int iterator = 1;
+int loopSpeed = 10; //millisecond delay for looping
 void setup(){
     // Initialize rate to stable rate
     Serial.begin(230400);
@@ -50,6 +51,12 @@ void loop(){
       case 'w':
         wipe();
         break;
+      case '9':
+      loopSpeed=10;
+      break;
+      case '1':
+      loopSpeed=100;
+      break;
       default:
         break;
     }
@@ -239,7 +246,7 @@ void sendCommand(String command, int addr, String data) {
     commandString += ' ';
     commandString += data;
     Serial.println(commandString);
-    delay(10);
+    delay(loopSpeed);
 }
 
 

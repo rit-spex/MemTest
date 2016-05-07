@@ -16,7 +16,8 @@ class UIButton {
  
  void display() {
    textAlign(CENTER, CENTER);
-   fill(100,155,255);
+   fill(20,160,191);
+   if(command=="" || command=="corrupt" || command=="written") fill(232,204,178);
    rect(xPos, yPos, boxWidth, boxHeight);
    fill(0);
    textSize(30);
@@ -44,4 +45,5 @@ class UIButton {
     if(x>minX && x<maxX && y>minY && y<maxY) return true;
     return false;
   }
+  
 }
