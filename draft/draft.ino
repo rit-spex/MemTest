@@ -1,5 +1,11 @@
-#include <SPI.h>
-#include <SpiRAM.h>
+/*RIT Space Exploration Radiation Memory Testing Proof of Concept
+ * Authors: T.J. Tarazevits, Austin Bodzas
+ * Display Date: ImagineRIT May 7th, 2016
+ * repo: https://github.com/venku122/MemTest
+ */
+
+#include <SPI.h> 
+#include <SpiRAM.h> //arduino library supports SRAM chip
 
 #define SS 10           // Slave Select pin is 10
 //#define DATA_SIZE 32000 // 23768 bytes is max capacity of the chip
@@ -7,14 +13,14 @@
 
 #define BITSHIFTS 10    // Quantity of bitshifts to operate on the data
 #define STRING_LENGTH  29 // Length of the packet data member
-struct packet{
+struct packet{ //the struct is a representation of the page size
     uint16_t address;
     boolean isCorrupt;
     char data[STRING_LENGTH];
 };
 
 byte clock = 0;
-SpiRAM Sram(0, SS);
+SpiRAM Sram(0, SS); //initalizes SRAM library
 int iterator = 1;
 int loopSpeed = 10; //millisecond delay for looping
 void setup(){
@@ -29,18 +35,17 @@ void setup(){
 }
 /**
  * Serial input commands:
- * Initialize: i
- * Read
+ * all commands report status change to the visualizer
+ * Initialize: 'i' fills entire memory chip with data in packet sized chunks
+ * wipe: 'w' clears entire memory chip
+ * corrupt: 'c' randomly chooses a packet and flips the bits of the data stored within
  */
 
-
+//main logic loop of the program
 void loop(){
-  //initialize();
   if(Serial.available() > 0){
     char command = Serial.read();
-    
 
-    // Need to finish on these switch cases
     switch(command){
       case 'i':
         initialize();
@@ -51,56 +56,20 @@ void loop(){
       case 'w':
         wipe();
         break;
-      case '9':
+      case '9': //sets loop delay to ASAP
       loopSpeed=10;
       break;
       case '1':
-      loopSpeed=100;
+      loopSpeed=100; //slows down memory processes
       break;
       default:
         break;
     }
-
-    
   }
-    /*iterator++;
-    if(iterator>961) iterator = 1;
-    String commandString = "write ";
-    if (iterator<100) commandString += '0';
-    if (iterator<10) commandString += '0';
-    commandString += iterator;
-    commandString += " This is the data";
-    Serial.println(commandString);
-    delay(50);*/
 }
 
+//gets a random address of a packet/page in memory
 int getSerialPacketNumber(){
-  /*if(Serial.available() == 4){
-    int packetNumber = 0;
-
-    // 1000's place
-    char input = Serial.read();     
-    packetNumber += ((int) atol(&input)) * 1000;
-
-    // 100's place
-    input = Serial.read();
-    packetNumber += ((int) atol(&input)) * 100;
-
-    // 10's
-    input = Serial.read();
-    packetNumber += ((int) atol(&input)) * 10;
-
-    //1's
-    input = Serial.read();
-    packetNumber += (int) atol(&input);
-
-    return packetNumber;
-  }
-
-  
-
-  return 0;*/
-
   int addr = sizeof(packet) * (int)random(0,(DATA_SIZE / sizeof(packet)));
   return addr;
 }
@@ -120,18 +89,14 @@ void corrupt(int packetNumber){
 
       for(int i = 0; i < BITSHIFTS; i++){
         rand = random(0,29);
-
         data.data[rand] = data.data[rand] ^ ( (char) 1 << random(1,8));   // XOR 
       }
 
       data.isCorrupt = true;
 
       writePacket(data, packetNumber);
-      sendCommand("crrpt ", packetNumber, data.data);
-      
+      sendCommand("crrpt ", packetNumber, data.data); //mirrors the command on the visualizer
     }
-    
-
 }
 
 /**
@@ -223,6 +188,7 @@ void initialize(){
     }
 }
 
+//wipes entire chip in page sized chunks
 void wipe() {
   for(uint16_t i = 0; i < (DATA_SIZE / sizeof(packet)); i++){
     char buffer[sizeof(packet)] = "";

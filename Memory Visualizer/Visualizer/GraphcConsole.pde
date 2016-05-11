@@ -1,9 +1,9 @@
 import java.util.List;
 
+//class manages a text console that uses the Processing graphics engine
 class GraphicConsole {
-  //String buffer;
-  LinkedList<String> buffer;
-  int xPos,yPos,boxWidth,boxHeight, currentLine, maxLine;
+  LinkedList<String> buffer; // each row of the console is its own string
+  int xPos,yPos,boxWidth,boxHeight, currentLine, maxLine; // display variables
   PFont font;
   
   GraphicConsole(int xPos, int yPos, int boxWidth, int boxHeight) {
@@ -12,12 +12,12 @@ class GraphicConsole {
     this.yPos = yPos;
     this.boxWidth = boxWidth;
     this.boxHeight = boxHeight;
-    //this.font = font;
     buffer.addLast( "Console Initalized");
     currentLine= 1;
-    maxLine = 24;
+    maxLine = 24;// determines the maximum height of the console before text loops
   }
   
+  //draws the various components of the console as well as the data
   void display() {
    
    //draw console window
@@ -44,15 +44,16 @@ class GraphicConsole {
    
   }
   
+  //adds string to the console on its own line
   void println(String input) {
     if(input!=null) {
    buffer.addLast(input);
    currentLine++;
-  if(currentLine>maxLine) buffer.removeFirst();
+  if(currentLine>maxLine) buffer.removeFirst(); // allows old lines to be discarded to make way for new information
     }
   }
  
-  
+  //clears entire console
   void clear() {
    buffer.clear();
   }
